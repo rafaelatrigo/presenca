@@ -68,7 +68,7 @@ function listar_() {
       empresa: r[m.empresa],
       categoria: r[m.categoria],
       presente: r[m.status] === PRESENTE,
-      chegada: r[m.chegada] instanceof Date
+      chegada: (r[m.chegada] && typeof r[m.chegada].getTime === 'function')
         ? Utilities.formatDate(r[m.chegada], tz, 'HH:mm') : String(r[m.chegada] || ''),
       por: r[m.por]
     }));

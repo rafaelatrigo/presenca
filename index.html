@@ -230,6 +230,7 @@
     return d;
   }
   const hora = () => new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const fmtHora = v => { const s=String(v||''); if(!s || /^\d{1,2}:\d{2}$/.test(s)) return s; const d=new Date(s); return isNaN(d) ? s : d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
   function demoApi(p){
     const d = demoLer();
     if(p.acao==='confirmar'||p.acao==='desfazer'){
@@ -305,7 +306,7 @@
         <div class="info">
           <div class="nome">${realce(c.nome,q)}</div>
           <div class="sub">${c.categoria?`<span class="tag">${esc(c.categoria)}</span>`:''}${realce(c.empresa||'',q)}</div>
-          ${c.presente?`<div class="quem">✓ Chegou às ${esc(c.chegada)}${c.por?' · '+esc(c.por):''}</div>`:''}
+          ${c.presente?`<div class="quem">✓ Chegou às ${esc(fmtHora(c.chegada))}${c.por?' · '+esc(c.por):''}</div>`:''}
         </div>
         ${c.presente
           ? `<button class="btn desf" data-desf="${esc(c.id)}">Desfazer</button>`
@@ -359,7 +360,7 @@
 
   $('btnExp').onclick = () => {
     const cab = ['ID','Nome','Empresa','Categoria','Status','Chegada','Confirmado por'];
-    const linhas = convidados.map(c=>[c.id,c.nome,c.empresa,c.categoria,c.presente?'Presente':'Aguardando',c.chegada,c.por]);
+    const linhas = convidados.map(c=>[c.id,c.nome,c.empresa,c.categoria,c.presente?'Presente':'Aguardando',fmtHora(c.chegada),c.por]);
     const csv = '﻿'+[cab,...linhas].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
