@@ -328,7 +328,18 @@
     $('dot').className = 'dot' + (DEMO ? ' demo' : (v ? '' : ' off'));
   }
 
+  // se ao abrir a página não deu para buscar os eventos (sem internet, por ex.), tenta de novo
+  async function recuperarConfig(){
+    if(DEMO || !(dias.length <= 1 && !dias[0])) return;
+    try{
+      const r = await carregarConfig();
+      if(r.ok && dias.length && dias[0]) trocarDia(diaSugerido());
+    }catch(e){}
+  }
+
   async function carregar(){
+    if(ocupado) return;
+    await recuperarConfig();
     if(ocupado) return;
     const v = versaoLista;
     try{
