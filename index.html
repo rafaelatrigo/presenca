@@ -78,6 +78,20 @@
   .bookb.on{background:var(--ouro);border-color:var(--ouro);color:#fff}
   .bookb .cx{width:12px;height:12px;border-radius:3px;border:1.5px solid currentColor;display:inline-grid;place-items:center;font-size:9px;line-height:1}
   .bookb.on .cx{border-color:#fff}
+  .item.dep{margin-left:26px;padding-top:11px;padding-bottom:11px;border-style:dashed}
+  .item.dep .av{width:34px;height:34px;font-size:12px}
+  .item.dep .nome{font-size:15px;font-weight:500}
+  .item.nl{border-color:#E9D6AE;background:#FFFBF2}
+  .item.nl.ok{background:var(--verde-cl)}
+  .sub .uni{font-weight:600;color:var(--tx)}
+  .rsvp{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:6px}
+  .rsvp.ok{background:#E3EFE7;color:#1F6B47}
+  .rsvp.pend{background:#FBF0D9;color:#8A6416}
+  .rsvp.nada{background:#EFEDE9;color:#6B746F}
+  .rsvp.nao{background:#F7E4DF;color:#9A3A26}
+  .de{font-size:12.5px;color:var(--tx2);margin-top:3px}
+  .obs{font-size:12.5px;color:#7A5B22;margin-top:3px;font-style:italic}
+  .sub{white-space:normal;overflow:visible}
   mark{background:#F2E1C4;color:inherit;border-radius:3px;padding:0 1px}
   .vazio{text-align:center;color:var(--tx2);padding:40px 10px;font-size:15px}
   .vazio button{margin-top:14px}
@@ -145,7 +159,7 @@
   <div class="ferr-in">
     <div class="busca">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="text" enterkeyhint="search" placeholder="Buscar por nome ou empresa" autocomplete="off" autocorrect="off" spellcheck="false">
+      <input id="q" type="text" enterkeyhint="search" placeholder="Buscar por nome ou unidade" autocomplete="off" autocorrect="off" spellcheck="false">
       <button class="limpar" id="limpar" aria-label="Limpar">×</button>
     </div>
     <div class="filtros">
@@ -204,8 +218,11 @@
     <p>Será incluído na planilha já como presente.</p>
     <label for="addNome">Nome completo</label>
     <input id="addNome" autocomplete="off">
-    <label for="addEmp">Empresa (opcional)</label>
-    <input id="addEmp" autocomplete="off">
+    <label for="addUni">Unidade (opcional)</label>
+    <input id="addUni" autocomplete="off" inputmode="numeric">
+    <label for="addTit">Acompanhante de (opcional)</label>
+    <input id="addTit" list="listaTit" autocomplete="off" placeholder="Nome do titular">
+    <datalist id="listaTit"></datalist>
     <div class="erro-msg" id="errAdd"></div>
     <div class="acoes"><button class="b2" data-fechar>Cancelar</button><button class="b1" id="okAdd">Incluir e confirmar</button></div>
   </div>
@@ -234,23 +251,21 @@
   const nomeAtual = () => LS.get('recepcionista','');
 
   // ---------- Dados de demonstração ----------
-  const DEMO_DIAS = ['Dia 1 - 17/11','Dia 2 - 18/11'];
+  const DEMO_DIAS = ['Evento 01 - 17/11','Evento 02 - 18/11'];
   const DEMO_RECEP = ['Juliana Costa','Marcos Silva','Patrícia Souza','Renata Alves','Diego Santos'];
   const DEMO_BASE = [
-    ['Ana Beatriz Moreira','Moreira Arquitetura','Cliente'],['Bruno Cavalcanti','Imobiliária Litoral','Corretor'],
-    ['Camila Rocha Lima','Banco Bradesco','Parceiro'],['Daniel Nogueira','Nogueira Advogados','Cliente'],
-    ['Eduarda Figueiredo','Revista Bahia Casa','Imprensa'],['Fernando Albuquerque','Albuquerque Investimentos','Cliente'],
-    ['Gabriela Menezes','Lopes Consultoria Imobiliária','Corretor'],['Henrique Barreto','Construtora Atlântica','Parceiro'],
-    ['Isabela Prado','Prado & Filhos','Cliente'],['João Pedro Sampaio','Sampaio Imóveis','Corretor'],
-    ['Karina Oliveira','Caixa Econômica Federal','Parceiro'],['Lucas Vasconcelos','Vasconcelos Engenharia','Cliente'],
-    ['Mariana Teixeira','Portal Imóveis Salvador','Imprensa'],['Nicolas Andrade','Andrade Corretora','Corretor'],
-    ['Olívia Bittencourt','Bittencourt Design','Cliente'],['Paulo Ricardo Dantas','Dantas Incorporações','Parceiro'],
-    ['Quésia Fontes','Fontes Negócios Imobiliários','Corretor'],['Rafael Cerqueira','Cerqueira Médicos Associados','Cliente'],
-    ['Sofia Magalhães','Jornal da Cidade','Imprensa'],['Tiago Guimarães','Guimarães Participações','Cliente']
+    ['206','ADRIANA EXEMPLO DE JESUS','Titular','','CONFIRMADO',''],
+    ['325','ALEX EXEMPLO DE OLIVEIRA','Titular','','CONFIRMADO',''],
+    ['325','LORENA EXEMPLO COSTA','Sócio / Co-participante','ALEX EXEMPLO DE OLIVEIRA','CONFIRMADO','N/A'],
+    ['1015','BRUNO EXEMPLO AMIN','Titular','','A CONFIRMAR',''],
+    ['1015','ANDREZA EXEMPLO AMIN','Cônjuge','BRUNO EXEMPLO AMIN','A CONFIRMAR','N/A'],
+    ['328',"EXEMPLO D'FLORES LTDA",'Titular','',"CONTATO SEM SUCESSO. ENVIADO PLO WHAT'S",''],
+    ['328','ALISSON EXEMPLO TORRES','Sócio / Co-participante',"EXEMPLO D'FLORES LTDA","CONTATO SEM SUCESSO. ENVIADO PLO WHAT'S",'N/A'],
+    ['609','LEANDRO EXEMPLO DA SILVA','Titular','','NÃO VAI ESTAR EM SALVADOR','']
   ];
   function demoLer(dia){
-    const todos = LS.get('demo2', {});
-    if(!todos[dia]) todos[dia] = DEMO_BASE.map((r,i)=>({id:String(i+1),nome:r[0],empresa:r[1],categoria:r[2],presente:false,chegada:'',por:'',book:false}));
+    const todos = LS.get('demo3', {});
+    if(!todos[dia]) todos[dia] = DEMO_BASE.map((r,i)=>{ const o={id:String(i+1),ordem:i,unidade:r[0],nome:r[1],vinculo:r[2],titular:r[3],rsvp:r[4],obs:'',presente:false,chegada:'',por:''}; if(r[5]!=='N/A') o.book=false; return o; });
     return {todos, d: todos[dia]};
   }
   const hora = () => new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -265,9 +280,9 @@
     }
     if(p.acao==='book'){ const c = d.find(x=>x.id===String(p.id)); if(!c) return {ok:false,erro:'nao_encontrado'}; c.book = p.valor==='1'; }
     if(p.acao==='adicionar'){
-      d.push({id:String(Math.max(...d.map(x=>+x.id||0))+1),nome:p.nome,empresa:p.empresa||'',categoria:'Não listado',presente:true,chegada:hora(),por:p.por,book:false});
+      d.push({id:String(Math.max(...d.map(x=>+x.id||0))+1),ordem:d.length,nome:p.nome,unidade:p.unidade||'',vinculo:'Não listado',titular:p.titular||'',rsvp:'',obs:'',presente:true,chegada:hora(),por:p.por});
     }
-    LS.set('demo2',todos);
+    LS.set('demo3',todos);
     return {ok:true,convidados:d};
   }
 
@@ -339,7 +354,26 @@
     return esc(txt.slice(0,i))+'<mark>'+esc(txt.slice(i,i+q.length))+'</mark>'+esc(txt.slice(i+q.length));
   }
   const iniciais = n => String(n).trim().split(/\s+/).filter(Boolean).map(p=>p[0]).filter((_,i,a)=>i===0||i===a.length-1).join('').toUpperCase();
+  const MINUS = new Set(['de','da','do','das','dos','e','di','du']);
+  const tc = s => String(s||'').toLowerCase().split(/\s+/).filter(Boolean).map((w,i)=>{
+    if(i>0 && MINUS.has(w)) return w;
+    if(/^(ltda|me|eireli|s\/a|sa|epp|ii|iii)$/.test(w)) return w.toUpperCase();
+    return w.replace(/(^|[('’-])([a-zà-ú])/g,(m,a,b)=>a+b.toUpperCase());
+  }).join(' ');
+  const RSVP = v => { const n = norm(v);
+    if(!n) return null;
+    if(n.startsWith('confirmado')) return {t:'RSVP confirmado', c:'ok'};
+    if(n.startsWith('a confirmar')) return {t:'RSVP a confirmar', c:'pend'};
+    if(n.includes('sem sucesso')) return {t:'Sem retorno do convite', c:'nada'};
+    if(n.includes('nao vai')) return {t:'Avisou que não vai', c:'nao'};
+    return {t:v, c:'nada'}; };
   const primeiroNome = n => String(n||'').trim().split(/\s+/)[0] || '—';
+
+  // titulares com book pendente cuja família (titular ou acompanhante) já chegou
+  function semBookPendentes(){
+    return convidados.filter(c => c.book === false &&
+      (c.presente || convidados.some(d => d.titular && d.titular === c.nome && d.presente)));
+  }
 
   function render(){
     const tot = convidados.length, pres = convidados.filter(c=>c.presente).length, aus = tot-pres;
@@ -348,40 +382,62 @@
     $('kBar').style.width = tot ? (pres/tot*100)+'%' : '0';
     $('cTodos').textContent = tot; $('cAus').textContent = aus; $('cPres').textContent = pres;
     const temBook = convidados.some(c => c.book !== undefined);
+    const pend = temBook ? semBookPendentes() : [];
     $('chipBook').hidden = !temBook;
-    $('cSemBook').textContent = convidados.filter(c=>c.presente && !c.book).length;
+    $('cSemBook').textContent = pend.length;
     if(!temBook && filtro==='semBook') filtro = 'todos';
 
     const q = norm($('q').value.trim());
     $('limpar').style.display = q ? 'block' : 'none';
-    let l = convidados.filter(c => filtro==='todos' || (filtro==='pres' && c.presente) || (filtro==='aus' && !c.presente) || (filtro==='semBook' && c.presente && !c.book));
-    if(q) l = l.filter(c => norm(c.nome).includes(q) || norm(c.empresa).includes(q));
-    l.sort((a,b)=> filtro==='pres' ? String(fmtHora(b.chegada)).localeCompare(String(fmtHora(a.chegada))) : String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+    let l = filtro==='semBook' ? pend.slice()
+      : convidados.filter(c => filtro==='todos' || (filtro==='pres' && c.presente) || (filtro==='aus' && !c.presente));
+    if(q){
+      const bate = c => [c.nome, c.unidade, c.titular, c.empresa, c.obs].some(v => norm(v).includes(q));
+      const achados = l.filter(bate);
+      // se achou um acompanhante, mostra também o titular dele (e vice-versa pelo campo Titular)
+      const titulares = new Set(achados.map(c => c.titular).filter(Boolean));
+      l = l.filter(c => bate(c) || titulares.has(c.nome));
+    }
+    const ord = c => (c.ordem ?? 1e6);
+    l.sort((a,b)=> filtro==='pres'
+      ? String(fmtHora(b.chegada)).localeCompare(String(fmtHora(a.chegada)))
+      : (ord(a)-ord(b)) || String(a.nome).localeCompare(String(b.nome),'pt-BR'));
 
     if(!l.length){
       $('lista').innerHTML = `<div class="vazio">${q?'Nenhum convidado encontrado para essa busca.':(carregado||tot?'Nada por aqui.':'Carregando lista…')}${q?'<br><button class="btn" id="vazioAdd">+ Incluir “'+esc($('q').value.trim())+'”</button>':''}</div>`;
       const b = $('vazioAdd'); if(b) b.onclick = () => abrirAdd($('q').value.trim());
       return;
     }
-    $('lista').innerHTML = l.map(c => `
-      <div class="item ${c.presente?'ok':''}">
+    $('lista').innerHTML = l.map(c => {
+      const dep = !!c.titular && norm(c.vinculo) !== 'titular';
+      const nl = norm(c.vinculo) === 'nao listado' || norm(c.categoria) === 'nao listado';
+      const r = (!dep && !nl) ? RSVP(c.rsvp) : null;
+      const vinc = String(c.vinculo || c.categoria || '').replace(/S[óo]cio\s*\/\s*Co-participante/i,'Sócio');
+      const subPartes = [];
+      if(c.unidade && !dep) subPartes.push(`<span class="uni">Unid. ${realce(c.unidade,q)}</span>`);
+      if(c.empresa) subPartes.push(realce(tc(c.empresa),q));
+      if(r) subPartes.push(`<span class="rsvp ${r.c}">${esc(r.t)}</span>`);
+      return `
+      <div class="item ${c.presente?'ok':''} ${dep?'dep':''} ${nl?'nl':''}">
         <div class="av">${esc(iniciais(c.nome))}</div>
         <div class="info">
-          <div class="nome">${realce(c.nome,q)}${c.book!==undefined?`<button class="bookb ${c.book?'on':''}" data-book="${esc(c.id)}" aria-pressed="${c.book?'true':'false'}" title="Recebeu o Book"><span class="cx">${c.book?'✓':''}</span>Book</button>`:''}</div>
-          <div class="sub">${c.categoria?`<span class="tag">${esc(c.categoria)}</span>`:''}${realce(c.empresa||'',q)}</div>
+          <div class="nome">${realce(tc(c.nome),q)}${c.book!==undefined?`<button class="bookb ${c.book?'on':''}" data-book="${esc(c.id)}" aria-pressed="${c.book?'true':'false'}" title="Recebeu o Book"><span class="cx">${c.book?'✓':''}</span>Book</button>`:''}</div>
+          <div class="sub">${vinc?`<span class="tag">${esc(vinc)}</span>`:''}${subPartes.join(' · ')}</div>
+          ${dep?`<div class="de">↳ acompanha ${realce(tc(c.titular),q)}</div>`:''}
+          ${c.obs?`<div class="obs">${esc(c.obs)}</div>`:''}
           ${c.presente?`<div class="quem">✓ Chegou às ${esc(fmtHora(c.chegada))}${c.por?' · '+esc(c.por):''}</div>`:''}
         </div>
         ${c.presente
           ? `<button class="btn desf" data-desf="${esc(c.id)}">Desfazer</button>`
           : `<button class="btn" data-conf="${esc(c.id)}">Confirmar</button>`}
-      </div>`).join('');
+      </div>`; }).join('');
   }
 
   $('lista').addEventListener('click', e => {
     const b = e.target.closest('button'); if(!b) return;
     if(b.dataset.conf) confirmar(b.dataset.conf, b);
     if(b.dataset.book) marcarBook(b.dataset.book, b);
-    if(b.dataset.desf){ alvoDesf = convidados.find(c=>c.id===b.dataset.desf); $('txtDesf').textContent = `Marcar ${alvoDesf.nome} como "aguardando" de novo?`; abrir('mDesf'); }
+    if(b.dataset.desf){ alvoDesf = convidados.find(c=>c.id===b.dataset.desf); $('txtDesf').textContent = `Marcar ${tc(alvoDesf.nome)} como "aguardando" de novo?`; abrir('mDesf'); }
   });
 
   async function enviar(params, otimista){
@@ -408,14 +464,14 @@
     const c = convidados.find(x=>x.id===id); if(!c) return;
     btn.disabled = true;
     const ok = await enviar({acao:'confirmar', id}, () => { c.presente=true; c.chegada=hora(); c.por=nomeAtual(); });
-    if(ok){ toast('✓ '+c.nome+' confirmado(a)'); if($('q').value){ $('q').value=''; render(); $('q').focus(); } }
+    if(ok){ toast('✓ '+tc(c.nome)+' confirmado(a)'); if($('q').value){ $('q').value=''; render(); $('q').focus(); } }
   }
 
   async function marcarBook(id, btn){
     const c = convidados.find(x=>x.id===id); if(!c) return;
     const novo = !c.book; btn.disabled = true;
     const ok = await enviar({acao:'book', id, valor: novo?'1':'0'}, () => { c.book = novo; });
-    if(ok) toast(novo ? '📘 Book entregue para '+c.nome : 'Book desmarcado para '+c.nome);
+    if(ok) toast(novo ? '📘 Book entregue: '+tc(c.nome) : 'Book desmarcado: '+tc(c.nome));
   }
 
   $('okDesf').onclick = async () => {
@@ -423,18 +479,19 @@
     await enviar({acao:'desfazer', id:c.id}, () => { c.presente=false; c.chegada=''; c.por=''; });
   };
 
-  function abrirAdd(nome){ $('addNome').value = nome||''; $('addEmp').value=''; $('errAdd').textContent=''; abrir('mAdd'); setTimeout(()=>$('addNome').focus(),50); }
+  function abrirAdd(nome){ $('addNome').value = nome||''; $('addUni').value=''; $('addTit').value=''; $('listaTit').innerHTML = convidados.filter(c=>norm(c.vinculo)==='titular').map(c=>`<option value="${esc(c.nome)}">Unid. ${esc(c.unidade)}</option>`).join(''); $('errAdd').textContent=''; abrir('mAdd'); setTimeout(()=>$('addNome').focus(),50); }
   $('btnAdd').onclick = () => abrirAdd($('q').value.trim());
   $('okAdd').onclick = async () => {
     const nome = $('addNome').value.trim(); if(!nome){ $('errAdd').textContent='Informe o nome.'; return; }
     fechar('mAdd');
-    const ok = await enviar({acao:'adicionar', nome, empresa:$('addEmp').value.trim()});
-    if(ok){ toast('✓ '+nome+' incluído(a) e confirmado(a)'); $('q').value=''; render(); }
+    const tit = $('addTit').value.trim(); const t = convidados.find(c=>norm(c.nome)===norm(tit));
+    const ok = await enviar({acao:'adicionar', nome: nome.toUpperCase(), unidade: $('addUni').value.trim() || (t?t.unidade:''), titular: t ? t.nome : tit});
+    if(ok){ toast('✓ '+tc(nome)+' incluído(a) e confirmado(a)'); $('q').value=''; render(); }
   };
 
   $('btnExp').onclick = () => {
-    const cab = ['Dia','ID','Nome','Empresa','Categoria','Status','Chegada','Confirmado por','Recebeu o Book'];
-    const linhas = convidados.map(c=>[rotuloDia(diaAtual()),c.id,c.nome,c.empresa,c.categoria,c.presente?'Presente':'Aguardando',fmtHora(c.chegada),c.por,c.book?'Sim':'']);
+    const cab = ['Evento','ID','Unidade','Nome','Vínculo','Titular','RSVP','Status','Chegada','Confirmado por','Book','Observações'];
+    const linhas = convidados.slice().sort((a,b)=>(a.ordem??0)-(b.ordem??0)).map(c=>[rotuloDia(diaAtual()),c.id,c.unidade,c.nome,c.vinculo||c.categoria,c.titular,c.rsvp,c.presente?'Presente':'Aguardando',fmtHora(c.chegada),c.por,c.book===undefined?'N/A':(c.book?'Sim':''),c.obs]);
     const csv = '﻿'+[cab,...linhas].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
@@ -551,7 +608,7 @@
   })();
 
   // no modo demo, sincroniza abas abertas no mesmo navegador
-  if(DEMO) window.addEventListener('storage', e => { if(e.key==='lp_demo2'){ convidados = demoLer(diaAtual()).d; render(); } });
+  if(DEMO) window.addEventListener('storage', e => { if(e.key==='lp_demo3'){ convidados = demoLer(diaAtual()).d; render(); } });
 })();
 </script>
 </body>
