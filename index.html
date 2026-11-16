@@ -190,8 +190,7 @@
     </div>
     <div id="passoDados" hidden>
       <label for="inNome">Seu nome</label>
-      <input id="inNome" list="listaRecep" placeholder="Nome do(a) recepcionista" autocomplete="off" autocapitalize="words">
-      <datalist id="listaRecep"></datalist>
+      <input id="inNome" placeholder="Seu nome e sobrenome" autocomplete="off" autocapitalize="words">
       <div id="boxDia">
         <label for="selDia">Dia do evento</label>
         <select id="selDia"></select>
@@ -272,6 +271,7 @@
   const fmtHora = v => { const s=String(v||''); if(!s || /^\d{1,2}:\d{2}$/.test(s)) return s; const d=new Date(s); return isNaN(d) ? s : d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
   function demoApi(p){
     if(p.acao==='config') return {ok:true, dias:DEMO_DIAS, recepcionistas:DEMO_RECEP};
+    if(p.acao==='registrar'){ const r = LS.get('demoRecep', []); if(!r.includes(p.nome)) r.push(p.nome); LS.set('demoRecep', r); return {ok:true}; }
     const {todos, d} = demoLer(p.dia);
     if(p.acao==='confirmar'||p.acao==='desfazer'){
       const c = d.find(x=>x.id===String(p.id)); if(!c) return {ok:false,erro:'nao_encontrado'};
@@ -548,7 +548,6 @@
     $('txtEnt').textContent = p==='cod' ? 'Digite o código de acesso informado pela organização.' : 'Informe seu nome e o dia do evento. Fica salvo neste aparelho.';
     $('btnEntrar').textContent = p==='cod' ? 'Continuar' : 'Entrar';
     if(p==='dados'){
-      $('listaRecep').innerHTML = recepcionistas.map(n=>`<option value="${esc(n)}">`).join('');
       $('inNome').value = nomeAtual();
       preencherDias($('selDia'), diaSugerido());
       $('boxDia').hidden = dias.length < 2;
@@ -580,6 +579,7 @@
     const nome = $('inNome').value.trim().replace(/\s+/g,' ');
     if(nome.length < 2){ $('errEnt').textContent='Informe seu nome.'; $('inNome').focus(); return; }
     LS.set('recepcionista', nome);
+    api({acao:'registrar', nome, dia: $('selDia').value}).catch(()=>{});  // grava na aba Recepcionistas
     $('entrada').classList.remove('show');
     $('dispNome').textContent = primeiroNome(nome);
     iniciar($('selDia').value, true);
