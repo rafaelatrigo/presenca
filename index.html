@@ -373,8 +373,8 @@
   }).join(' ');
   const RSVP = v => { const n = norm(v);
     if(!n) return null;
-    if(n.startsWith('confirmado')) return {t:'RSVP confirmado', c:'ok'};
-    if(n.startsWith('a confirmar')) return {t:'RSVP a confirmar', c:'pend'};
+    if(n.startsWith('confirmado')) return {t:'Confirmou presença', c:'ok'};
+    if(n.startsWith('a confirmar')) return {t:'A confirmar', c:'pend'};
     if(n.includes('sem sucesso')) return {t:'Sem retorno do convite', c:'nada'};
     if(n.includes('nao vai')) return {t:'Avisou que não vai', c:'nao'};
     return {t:v, c:'nada'}; };
@@ -501,7 +501,7 @@
   };
 
   $('btnExp').onclick = () => {
-    const cab = ['Evento','ID','Unidade','Nome','Vínculo','Titular','RSVP','Status','Chegada','Confirmado por','Book','Observações'];
+    const cab = ['Evento','ID','Unidade','Nome','Vínculo','Titular','Confirmação do convite','Status','Chegada','Confirmado por','Book','Observações'];
     const linhas = convidados.slice().sort((a,b)=>(a.ordem??0)-(b.ordem??0)).map(c=>[rotuloDia(diaAtual()),c.id,c.unidade,c.nome,c.vinculo||c.categoria,c.titular,c.rsvp,c.presente?'Presente':'Aguardando',fmtHora(c.chegada),c.por,c.book===undefined?'N/A':(c.book?'Sim':''),c.obs]);
     const csv = '﻿'+[cab,...linhas].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
     const a = document.createElement('a');
