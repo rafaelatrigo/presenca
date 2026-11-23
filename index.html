@@ -474,20 +474,20 @@
   async function confirmar(id, btn){
     const c = convidados.find(x=>x.id===id); if(!c) return;
     btn.disabled = true;
-    const ok = await enviar({acao:'confirmar', id}, () => { c.presente=true; c.chegada=hora(); c.por=nomeAtual(); });
+    const ok = await enviar({acao:'confirmar', id, nome:c.nome}, () => { c.presente=true; c.chegada=hora(); c.por=nomeAtual(); });
     if(ok){ toast('✓ '+tc(c.nome)+' confirmado(a)'); if($('q').value){ $('q').value=''; render(); $('q').focus(); } }
   }
 
   async function marcarBook(id, btn){
     const c = convidados.find(x=>x.id===id); if(!c) return;
     const novo = !c.book; btn.disabled = true;
-    const ok = await enviar({acao:'book', id, valor: novo?'1':'0'}, () => { c.book = novo; });
+    const ok = await enviar({acao:'book', id, nome:c.nome, valor: novo?'1':'0'}, () => { c.book = novo; });
     if(ok) toast(novo ? '📘 Book entregue: '+tc(c.nome) : 'Book desmarcado: '+tc(c.nome));
   }
 
   $('okDesf').onclick = async () => {
     const c = alvoDesf; fechar('mDesf'); if(!c) return;
-    await enviar({acao:'desfazer', id:c.id}, () => { c.presente=false; c.chegada=''; c.por=''; });
+    await enviar({acao:'desfazer', id:c.id, nome:c.nome}, () => { c.presente=false; c.chegada=''; c.por=''; });
   };
 
   function abrirAdd(nome){ $('addNome').value = nome||''; $('addUni').value=''; $('addTit').value=''; $('listaTit').innerHTML = convidados.filter(c=>norm(c.vinculo)==='titular').map(c=>`<option value="${esc(c.nome)}">Unid. ${esc(c.unidade)}</option>`).join(''); $('errAdd').textContent=''; abrir('mAdd'); setTimeout(()=>$('addNome').focus(),50); }
