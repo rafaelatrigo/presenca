@@ -376,7 +376,8 @@
     if(n.startsWith('confirmado')) return {t:'Confirmou presença', c:'ok'};
     if(n.startsWith('a confirmar')) return {t:'A confirmar', c:'pend'};
     if(n.includes('sem sucesso')) return {t:'Sem retorno do convite', c:'nada'};
-    if(n.includes('nao vai')) return {t:'Avisou que não vai', c:'nao'};
+    if(n.includes('nao vai') || n.includes('fora de salvador')) return {t:'Avisou que não vai', c:'nao'};
+    if(n.includes('exterior')) return {t:'Reside no exterior', c:'nao'};
     return {t:v, c:'nada'}; };
   const primeiroNome = n => String(n||'').trim().split(/\s+/)[0] || '—';
 
